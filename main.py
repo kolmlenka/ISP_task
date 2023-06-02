@@ -33,7 +33,6 @@ def main():
     import matplotlib.pyplot as plt
     import argparse
     from pathlib import Path
-    from multiprocessing import Pool
 
     aspect_ratios = set()
     count = 0
