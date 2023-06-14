@@ -23,8 +23,9 @@ def clickable(node, flag=None):
 def test(node):
     if not node or not node.get("clickable"):
         return False
-    for c in node.get("children", []):
-        return test(c)
+    if node.get("clickable") is False:
+        return False
+    return (test(c) for c in node.get("children", []))
 
 
 def file_processing(name_json):
@@ -37,7 +38,8 @@ def file_processing(name_json):
 
     d = depth(current["activity"]["root"])
 
-    interactivity = clickable(current)
+    interactivity = test(current)
+    print(interactivity)
 
     name_jpg = name_json.with_suffix(".jpg")
     width, height = imagesize.get(name_jpg)
