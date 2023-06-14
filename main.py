@@ -27,17 +27,35 @@ def test(node):
         return test(c)
 
 
-def main():
-
+def file_processing(name_json):
     import json
     import imagesize
+
+    with open(name_json, "r") as my_file:
+        cur_json = my_file.read()
+    current = json.loads(cur_json)
+
+    d = depth(current["activity"]["root"])
+
+    interactivity = clickable(current)
+
+    name_jpg = name_json.with_suffix(".jpg")
+    width, height = imagesize.get(name_jpg)
+    res = width / height
+
+    aspect_ratios = round(res, 4)
+
+    return [d, interactivity, aspect_ratios]
+
+
+def main():
     import matplotlib.pyplot as plt
     import argparse
     from pathlib import Path
+    import multiprocessing
 
     aspect_ratios = set()
-    count = 0
-    interactive = 0
+    non_interactive = 0
     list_of_depths = []
 
     parser = argparse.ArgumentParser()
@@ -55,32 +73,30 @@ def main():
     args = parser.parse_args()
 
     list_of_jsons = list(args.pathname.glob("*.json"))
+
     if args.n is None:
         limit = len(list_of_jsons)
     else:
         limit = args.n
-    for name_json in list_of_jsons:
-        count += 1
-        if count > limit:
-            break
-        with open(name_json, "r") as my_file:
-            cur_json = my_file.read()
-        current = json.loads(cur_json)
 
-        list_of_depths += [depth(current["activity"]["root"])]
+    with multiprocessing.Pool(multiprocessing.cpu_count()) as p:
+        answers = p.map(file_processing, list_of_jsons[:limit])
+        p.close()
+        p.join()
 
-        if clickable(current) is True:
-            interactive += 1
+    for i in range(limit):
+        list_of_depths += [answers[i][0]]
 
-        name_jpg = name_json.with_suffix(".jpg")
-        width, height = imagesize.get(name_jpg)
-        res = width / height
-        aspect_ratios.add(round(res, 4))
+        if answers[i][1] is False:
+            non_interactive += 1
 
-    print("aspect ratios: ", end="")
-    print(aspect_ratios)
+        aspect_ratios.add(answers[i][2])
 
-    print("interactive screenshots: " + str(interactive))
+    print("aspect ratios: ", aspect_ratios)
+
+    print("non-interactive screenshots: " + str(non_interactive))
+
+    print(list_of_depths)
 
     fig = plt.figure(figsize=(6, 4))
     x = fig.add_subplot()
