@@ -39,7 +39,7 @@ def file_processing(name_json):
     d = depth(current["activity"]["root"])
 
     interactivity = clickable(current)
-    print(interactivity)
+    # print(interactivity)
 
     name_jpg = name_json.with_suffix(".jpg")
     width, height = imagesize.get(name_jpg)
