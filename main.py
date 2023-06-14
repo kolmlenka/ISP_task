@@ -6,26 +6,26 @@ def depth(node):
     return max(depth(d) for d in node.get("children", [])) + 1
 
 
-def clickable(node, flag=None):
+def previous(node, flag=None):
     if not flag:
         flag = False
     for k in node.keys():
         if (k == "clickable") and (node[k] is True):
             return True
         elif type(node[k]) is dict:
-            flag = clickable(node[k], flag)
+            flag = previous(node[k], flag)
         elif k == "children":
             for j in range(len(node[k])):
-                flag = clickable(node[k][j], flag)
+                flag = previous(node[k][j], flag)
     return flag
 
 
-def test(node):
+def clickable(node):
     if not node or not node.get("clickable"):
         return False
-    if node.get("clickable") is False:
+    if not node.get("clickable"):
         return False
-    return (test(c) for c in node.get("children", []))
+    return (clickable(c) for c in node.get("children", []))
 
 
 def file_processing(name_json):
@@ -38,7 +38,7 @@ def file_processing(name_json):
 
     d = depth(current["activity"]["root"])
 
-    interactivity = test(current)
+    interactivity = clickable(current)
     print(interactivity)
 
     name_jpg = name_json.with_suffix(".jpg")
@@ -96,7 +96,7 @@ def main():
 
     print("aspect ratios: ", aspect_ratios)
 
-    print("non-interactive screenshots: " + str(non_interactive))
+    print("screenshots with non-interactive elements: " + str(non_interactive))
 
     # print(list_of_depths)
 
