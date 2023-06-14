@@ -96,7 +96,7 @@ def main():
 
     print("non-interactive screenshots: " + str(non_interactive))
 
-    print(list_of_depths)
+    # print(list_of_depths)
 
     fig = plt.figure(figsize=(6, 4))
     x = fig.add_subplot()
